@@ -1,13 +1,6 @@
 require('./env')
 const { Client, GatewayIntentBits } = require('discord.js');
 
-const curses = [
-    'fuck',
-    'cock',
-    'penis',
-    'poop',
-    'shit'
-]
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -20,15 +13,21 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.on('messageCreate', msg => {
+client.on('messageCreate', async (msg) => {
     console.log(`Received message: ${msg.content}`);
-    curses.every(curse => {
-        const sentence = msg.content.toLowerCase();
-        if (sentence.includes(curse)){
-            msg.reply('bad word u ban');
-            return false;
-        } 
-    })
+    // convert to lower case first
+    const sentence = msg.content.toLowerCase();
+    // hit api
+    const hitAPI = await fetch(`https://www.purgomalum.com/service/containsprofanity?text=${sentence}`)
+    // convert promise to plain text which will either return true or false
+    const response = await hitAPI.text();
+
+    console.log(response);
+    if (response === 'true'){
+        msg.reply('bad word u ban');
+        return false;
+    } 
+    
 });
 
 console.log(process.env.TOKEN)
