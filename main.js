@@ -45,7 +45,7 @@ client.on('messageCreate', async (msg) => {
         const serverName = msg.guild.name;
         console.log(`username: ${userName}`)
         console.log(`serverName: ${serverName}`)
-        let numOffences;
+        
         await pg('User')
         .insert({
             id: userId,
@@ -60,7 +60,7 @@ client.on('messageCreate', async (msg) => {
         }).onConflict('id')
         .ignore();
 
-        await pg('user_server_offences')
+        const numberOfOffences = await pg('user_server_offences')
         .insert({
             user_id: userId,
             server_id: serverId,
@@ -71,13 +71,23 @@ client.on('messageCreate', async (msg) => {
             num_offences: pg.raw('user_server_offences.num_offences + 1')
         })
         .returning('num_offences')
-        .then(newOffences => {
-            numOffences = newOffences;
-        })
+        .then(([{ num_offences }]) => num_offences)
+
         // we gotta handle stuff here
-        
-        if (numOffences === 1) msg.reply(`/mute ${userName} 5`)
-        console.log(numOffences);
+        msg.reply('bad');
+        if (numberOfOffences === 1) {
+            msg.member.timeout(5 * 60 * 1000);
+            msg.channel.send('lol bro got muted for 5 min');
+        }
+         else if (numberOfOffences === 2) {
+            msg.member.timeout(15 * 60 * 1000);
+            msg.channel.send('LMAOOO BRO MUTED FOR 15 MIN');
+        }
+         else if (numberOfOffences === 3){
+            msg.member.ban();
+            msg.channel.send('LMAOO BANNED');
+         } 
+        console.log(numberOfOffences);
     }
 });
 
