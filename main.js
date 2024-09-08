@@ -75,15 +75,15 @@ client.on('messageCreate', async (msg) => {
 
         // we gotta handle stuff here
         msg.reply('bad');
-        if (numberOfOffences === 1) {
+        if (numberOfOffences == 1) {
             msg.member.timeout(5 * 60 * 1000);
             msg.channel.send('lol bro got muted for 5 min');
         }
-         else if (numberOfOffences === 2) {
+         else if (numberOfOffences == 2) {
             msg.member.timeout(15 * 60 * 1000);
             msg.channel.send('LMAOOO BRO MUTED FOR 15 MIN');
         }
-         else if (numberOfOffences === 3){
+         else if (numberOfOffences >= 3){
             msg.member.ban();
             msg.channel.send('LMAOO BANNED');
          } 
