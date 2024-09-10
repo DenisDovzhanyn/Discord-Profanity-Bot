@@ -1,18 +1,6 @@
 require('./env')
 const { Client, GatewayIntentBits } = require('discord.js');
-
-const pg = require('knex') ({
-    client: 'pg',
-    connection: {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        user: process.env.DB_USER,
-        database: process.env.DB_NAME,
-        password: process.env.DB_PASSWORD,
-        ssl: false
-    }
-    
-})
+const increaseOffence  = require('./offence.service');
 
 const client = new Client({
     intents: [
@@ -46,47 +34,20 @@ client.on('messageCreate', async (msg) => {
         console.log(`username: ${userName}`)
         console.log(`serverName: ${serverName}`)
         
-        await pg('User')
-        .insert({
-            id: userId,
-            user_name: userName
-        }).onConflict('id')
-        .ignore();
-
-        await pg('Servers')
-        .insert({
-            id: serverId,
-            server_name: serverName
-        }).onConflict('id')
-        .ignore();
-
-        const numberOfOffences = await pg('user_server_offences')
-        .insert({
-            user_id: userId,
-            server_id: serverId,
-            num_offences: 1
-        })
-        .onConflict(['user_id', 'server_id'])
-        .merge({
-            num_offences: pg.raw('user_server_offences.num_offences + 1')
-        })
-        .returning('num_offences')
-        .then(([{ num_offences }]) => num_offences)
+        const numberOfOffences = increaseOffence(userId, userName, serverId, serverName);
 
         // we gotta handle stuff here
         msg.reply('bad');
-        if (numberOfOffences == 1) {
+        if (numberOfOffences === 1) {
             msg.member.timeout(5 * 60 * 1000);
             msg.channel.send('lol bro got muted for 5 min');
-        }
-         else if (numberOfOffences == 2) {
+        } else if (numberOfOffences === 2) {
             msg.member.timeout(15 * 60 * 1000);
             msg.channel.send('LMAOOO BRO MUTED FOR 15 MIN');
-        }
-         else if (numberOfOffences >= 3){
+        } else if (numberOfOffences >= 3){
             msg.member.ban();
             msg.channel.send('LMAOO BANNED');
-         } 
+        } 
         console.log(numberOfOffences);
     }
 });
