@@ -1,7 +1,8 @@
 require('./env')
 const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
-const increaseOffence  = require('./offence.service');
+const { increaseUsersOffenceByOne }  = require('./offence.service');
 const clear = require('./commands');
+const consumeApi = require('./profanity.service');
 
 const client = new Client({
     intents: [
@@ -38,9 +39,9 @@ client.on(Events.MessageCreate, async (msg) => {
     // convert to lower case first
     const sentence = msg.content.toLowerCase();
     // hit api
-    const hitAPI = await fetch(`https://www.purgomalum.com/service/containsprofanity?text=${sentence}`)
+    
     // convert promise to plain text which will either return true or false
-    const response = await hitAPI.text();
+    const response = await consumeApi(sentence);
 
     console.log(response);
     if (response === 'true' && msg.author.id != msg.guild.ownerId){
@@ -53,20 +54,21 @@ client.on(Events.MessageCreate, async (msg) => {
         console.log(`username: ${userName}`)
         console.log(`serverName: ${serverName}`)
         
-        const numberOfOffences = increaseOffence(userId, userName, serverId, serverName);
+        const numberOfOffences = await increaseUsersOffenceByOne(userId, userName, serverId, serverName);
 
         // we gotta handle stuff here
-        msg.reply('bad');
-        if (numberOfOffences === 1) {
-            msg.member.timeout(5 * 60 * 1000);
-            msg.channel.send('lol bro got muted for 5 min');
-        } else if (numberOfOffences === 2) {
-            msg.member.timeout(15 * 60 * 1000);
-            msg.channel.send('LMAOOO BRO MUTED FOR 15 MIN');
-        } else if (numberOfOffences >= 3){
-            msg.member.ban();
-            msg.channel.send('LMAOO BANNED');
-        } 
+        
+            if (numberOfOffences === 1) {
+                msg.member.timeout(5 * 60 * 1000);
+                msg.channel.send('lol bro got muted for 5 min');
+            } else if (numberOfOffences === 2) {
+                msg.member.timeout(15 * 60 * 1000);
+                msg.channel.send('LMAOOO BRO MUTED FOR 15 MIN');
+            } else if (numberOfOffences >= 3){
+                msg.member.ban();
+                msg.channel.send('LMAOO BANNED');
+            } 
+       
         console.log(numberOfOffences);
     }
 });
