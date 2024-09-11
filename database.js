@@ -61,5 +61,6 @@ const clearOffences = async (userId, serverId) => await pg(TABLE_NAMES.userServe
 module.exports = {
     increaseOffence,
     createServer,
-    createUser
+    createUser,
+    clearOffences
 }

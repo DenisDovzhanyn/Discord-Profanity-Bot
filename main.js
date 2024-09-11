@@ -1,6 +1,7 @@
 require('./env')
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
 const increaseOffence  = require('./offence.service');
+const clear = require('./commands');
 
 const client = new Client({
     intents: [
@@ -9,12 +10,30 @@ const client = new Client({
         GatewayIntentBits.MessageContent
     ]
 });
+client.commands = new Collection();
+client.commands.set(clear.data.name, clear);
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.on('messageCreate', async (msg) => {
+client.on(Events.InteractionCreate, async (interaction) => {
+    console.log('in interactioncreate')
+    if (!interaction.isChatInputCommand()) return;
+    command = interaction.client.commands.get(interaction.commandName);
+    
+    console.log('past first if statement')
+
+    if (!command) {
+        interaction.reply(`Command ${interaction.commandName} not found`);
+        return;
+    }
+    console.log('past second if statement');
+
+    await command.execute(interaction);
+})
+
+client.on(Events.MessageCreate, async (msg) => {
     console.log(`Received message: ${msg.content}`);
     // convert to lower case first
     const sentence = msg.content.toLowerCase();
@@ -24,7 +43,7 @@ client.on('messageCreate', async (msg) => {
     const response = await hitAPI.text();
 
     console.log(response);
-    if (response === 'true'){
+    if (response === 'true' && msg.author.id != msg.guild.ownerId){
         // if true we will want to pull user id AND server id. We do this bc we want to tie the user offences with the server so 
         // people dont get punished for offences from other servers
         const userId = msg.author.id;
