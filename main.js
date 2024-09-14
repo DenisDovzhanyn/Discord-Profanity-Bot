@@ -1,4 +1,4 @@
-require('./env')
+require('dotenv').config()
 const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
 const { increaseUsersOffenceByOne }  = require('./offence.service');
 const clear = require('./commands');
@@ -19,17 +19,13 @@ client.on('ready', () => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    console.log('in interactioncreate')
     if (!interaction.isChatInputCommand()) return;
     command = interaction.client.commands.get(interaction.commandName);
     
-    console.log('past first if statement')
-
     if (!command) {
         interaction.reply(`Command ${interaction.commandName} not found`);
         return;
     }
-    console.log('past second if statement');
 
     await command.execute(interaction);
 })
@@ -51,8 +47,6 @@ client.on(Events.MessageCreate, async (msg) => {
         const userName = msg.author.tag;
         const serverId = msg.guild.id;
         const serverName = msg.guild.name;
-        console.log(`username: ${userName}`)
-        console.log(`serverName: ${serverName}`)
         
         const numberOfOffences = await increaseUsersOffenceByOne(userId, userName, serverId, serverName);
 
@@ -72,9 +66,7 @@ client.on(Events.MessageCreate, async (msg) => {
             msg.channel.send(`Not enough permissions to punish ${msg.author.displayName}`)
         }
        
-        console.log(numberOfOffences);
     }
 });
 
-console.log(process.env.TOKEN)
 client.login(process.env.TOKEN);

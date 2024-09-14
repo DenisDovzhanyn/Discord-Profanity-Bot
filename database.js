@@ -1,4 +1,3 @@
-require('./env');
 
 const pg = require('knex') ({
     client: 'pg',

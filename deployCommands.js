@@ -1,5 +1,4 @@
 const { REST, Routes } = require('discord.js');
-require('./env');
 const command = require('./commands.js');
 
 const commandDataInJson = [command.data.toJSON()];
