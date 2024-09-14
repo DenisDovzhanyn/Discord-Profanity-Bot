@@ -44,7 +44,7 @@ client.on(Events.MessageCreate, async (msg) => {
     const response = await consumeApi(sentence);
 
     console.log(response);
-    if (response === 'true' && msg.author.id != msg.guild.ownerId){
+    if (response === 'true'){
         // if true we will want to pull user id AND server id. We do this bc we want to tie the user offences with the server so 
         // people dont get punished for offences from other servers
         const userId = msg.author.id;
@@ -57,17 +57,20 @@ client.on(Events.MessageCreate, async (msg) => {
         const numberOfOffences = await increaseUsersOffenceByOne(userId, userName, serverId, serverName);
 
         // we gotta handle stuff here
-        
+        try {
             if (numberOfOffences === 1) {
-                msg.member.timeout(5 * 60 * 1000);
-                msg.channel.send('lol bro got muted for 5 min');
+                await msg.member.timeout(5 * 60 * 1000);
+                msg.channel.send(`Muted ${msg.author.displayName} for 5 minutes`);
             } else if (numberOfOffences === 2) {
-                msg.member.timeout(15 * 60 * 1000);
-                msg.channel.send('LMAOOO BRO MUTED FOR 15 MIN');
+                await msg.member.timeout(15 * 60 * 1000);
+                await msg.channel.send(`Muted ${msg.author.displayName} for 15 minutes`);
             } else if (numberOfOffences >= 3){
-                msg.member.ban();
-                msg.channel.send('LMAOO BANNED');
+                await msg.member.ban();
+                msg.channel.send(`Banned ${msg.author.displayName}`);
             } 
+        } catch (error) {
+            msg.channel.send(`Not enough permissions to punish ${msg.author.displayName}`)
+        }
        
         console.log(numberOfOffences);
     }

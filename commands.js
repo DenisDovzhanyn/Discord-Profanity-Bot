@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { clearOffences } = require('./database.js');
 module.exports = {
     data: new SlashCommandBuilder()
@@ -8,7 +8,9 @@ module.exports = {
             user.setName('user')
             .setDescription('Clears this users offences')
             .setRequired(true)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
+        .setContexts(['Guild']),
     async execute(interaction) {
         const serverId = interaction.guildId;
         const user = interaction.options.getUser('user');
