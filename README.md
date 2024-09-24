@@ -24,4 +24,4 @@ This project is a Discord bot designed to monitor and manage user behavior by de
 
 - **Database:** Uses PostgreSQL via `knex.js` to manage user and server data, and to track offenses.
 - **Discord.js:** Utilizes the `discord.js` library for interacting with the Discord API.
-- **API Integration:** Integrates with a profanity detection API to identify offensive content in messages.
+- **API Integration:** Integrates with a profanity detection API to identify offensive content in messages..
